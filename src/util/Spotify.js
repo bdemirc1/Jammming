@@ -33,7 +33,6 @@ export const Spotify = {
         return fetch(`https://api.spotify.com/v1/search?type=track&q=${term}`, {
             headers: { 'Authorization': `Bearer ${accessToken}` }
         }).then(response => {
-            console.log(response.status);
             return response.json();
         }).then(jsonResponse => {
             if(!jsonResponse.tracks){
@@ -59,17 +58,25 @@ export const Spotify = {
             Authorization: `Bearer ${accessToken}`
         };
         return fetch('https://api.spotify.com/v1/me', { headers: headers}
-        ).then(response => { response.json()}
-        ).then(jsonResponse => {
-            let userID= jsonResponse.id.toString();
+        ).then(response => { return response.json()}
+        ).then(jResponse => {
+            //console.log(jResponse);
+            const userID= jResponse.id.toString();
             return fetch(`https://api.spotify.com/v1/users/${userID}/playlists`, {
                 headers: headers,
                 method: 'POST',
                 body: JSON.stringify({name: name})
             }).then(response => response.json()
             ).then(jsonResponse => {
+                console.log(jsonResponse);
                 const playlistID = jsonResponse.id.toString();
-                return playlistID;
+                return fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
+                    headers: headers,
+                    method: 'POST',
+                    'Content-Type': 'application/json',
+                    body: JSON.stringify({'uris': trackUris}) 
+                }).then(response => response.json()
+                ).then(jsonResponse => console.log(jsonResponse))
             })
         });
     }
